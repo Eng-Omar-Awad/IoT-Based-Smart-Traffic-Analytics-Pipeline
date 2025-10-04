@@ -1,0 +1,25 @@
+# === Python Cache Files ===
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# === VS Code Settings ===
+.vscode/
+
+# === Environment & Secrets ===
+.env
+*.log
+
+# === Temporary or Backup Files ===
+*.tmp
+*.bak
+
+# === SQLite / Data Files ===
+*.db
+*.db-journal
+*.csv
+
+# === OS-generated Files ===
+.DS_Store
+Thumbs.db
