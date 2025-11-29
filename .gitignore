@@ -1,25 +1,90 @@
-# === Python Cache Files ===
+###########################################
+#            PYTHON ARTIFACTS             #
+###########################################
 __pycache__/
 *.pyc
 *.pyo
 *.pyd
+*.pydistutils.cfg
+*.egg-info/
+.eggs/
+build/
+dist/
 
-# === VS Code Settings ===
+###########################################
+#          EDITORS & IDE SETTINGS         #
+###########################################
 .vscode/
+.idea/
+*.code-workspace
 
-# === Environment & Secrets ===
+###########################################
+#      ENVIRONMENT / SECRETS / KEYS       #
+###########################################
 .env
-*.log
+.env.*
+*.env
+*.key
+*.pem
+*.crt
+*.cfg
+*.ini
+*.token
 
-# === Temporary or Backup Files ===
+# Prevent accidental credential leaks
+**/credentials/
+**/secrets/
+**/keys/
+
+###########################################
+#           LOGS & TEMP FILES             #
+###########################################
+*.log
 *.tmp
 *.bak
+*.swp
+*.swo
+*.temp
 
-# === SQLite / Data Files ===
+###########################################
+#          DATABASE / PIPELINE DATA       #
+###########################################
+# SQLite (should NEVER be in GitHub)
 *.db
 *.db-journal
 
+# CSV and raw data (generated, not source-controlled)
+data/raw/*.csv
+data/processed/*.csv
+*.csv
 
-# === OS-generated Files ===
+# Parquet / ORC (big data files)
+*.parquet
+*.orc
+
+# Avro / JSONL logs
+*.avro
+*.jsonl
+
+###########################################
+#             AIRFLOW ARTIFACTS           #
+###########################################
+# Local Airflow configs and logs
+airflow/logs/
+airflow/*.pid
+airflow/airflow.db
+airflow/airflow.cfg
+airflow/webserver_config.py
+
+###########################################
+#           OS-GENERATED FILES            #
+###########################################
 .DS_Store
 Thumbs.db
+desktop.ini
+
+###########################################
+#        JUPYTER NOTEBOOK CHECKPOINTS     #
+###########################################
+.ipynb_checkpoints/
+*.nbconvert/
