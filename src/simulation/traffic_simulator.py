@@ -1,18 +1,27 @@
-import csv
-import random
 from datetime import datetime
+import random
+import json
 import os
+
+# Try importing KafkaProducer; provide a graceful fallback when not installed
+try:
+    from kafka import KafkaProducer  # kafka-python package
+    KAFKA_AVAILABLE = True
+except Exception:
+    KafkaProducer = None
+    KAFKA_AVAILABLE = False
+
+# Kafka configuration
+KAFKA_BROKER = "localhost:9092"
+TOPIC = "traffic_data"
 
 # Locations list
 LOCATIONS = ["Highway A1", "Highway A2", "City Center", "Airport Road", "Downtown"]
 
-
 def simulate_traffic_record():
-    """Generate one traffic sensor record."""
     vehicle_id = f"V{random.randint(100, 999)}"
-
     current_hour = datetime.now().hour
-    # Rush hour: slower speeds
+
     if 7 <= current_hour <= 9 or 17 <= current_hour <= 19:
         speed = random.randint(0, 60)
     else:
@@ -28,30 +37,51 @@ def simulate_traffic_record():
         "timestamp": timestamp
     }
 
+def produce_traffic_data(num_records=20):
+    if KAFKA_AVAILABLE:
+        try:
+            producer = KafkaProducer(
+                bootstrap_servers=KAFKA_BROKER,
+                value_serializer=lambda v: json.dumps(v).encode("utf-8"),
+            )
 
-def generate_traffic_data(output_path: str, num_records: int = 20):
-    """Generate multiple traffic records and save them into a CSV."""
-    os.makedirs(os.path.dirname(output_path), exist_ok=True)
+            for _ in range(num_records):
+                record = simulate_traffic_record()
+                producer.send(TOPIC, value=record)
+                print(f"Sent to Kafka: {record}")
 
-    header = ["vehicle_id", "speed", "location", "timestamp"]
+            producer.flush()
+            producer.close()
+        except Exception as e:
+            # Likely no brokers available (or other connection issue). Fall back to file output.
+            print(f"⚠️ Kafka producer failed to connect ({e}). Falling back to JSONL output.")
+            KAFKA_FALLBACK = True
+        else:
+            KAFKA_FALLBACK = False
+    else:
+        # Graceful fallback: write records to a local JSONL file so ETL can consume it
+        out_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..", "Data", "raw"))
+        os.makedirs(out_dir, exist_ok=True)
+        out_path = os.path.join(out_dir, "traffic_data_out.jsonl")
+        print("⚠️ Kafka not available — writing simulated records to:", out_path)
 
-    # Append mode
-    file_exists = os.path.isfile(output_path)
+        with open(out_path, "a", encoding="utf-8") as fh:
+            for _ in range(num_records):
+                record = simulate_traffic_record()
+                fh.write(json.dumps(record) + "\n")
+                print(f"Wrote record: {record}")
+        return
 
-    with open(output_path, mode="a", newline="") as file:
-        writer = csv.DictWriter(file, fieldnames=header)
-
-        if not file_exists or os.path.getsize(output_path) == 0:
-            writer.writeheader()
-
-        for _ in range(num_records):
-            record = simulate_traffic_record()
-            writer.writerow(record)
-            print(f"Logged: {record}")
-
-    return output_path
-
+    # If Kafka was available but failed to connect, run the same JSONL fallback
+    if 'KAFKA_FALLBACK' in locals() and KAFKA_FALLBACK:
+        out_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..", "Data", "raw"))
+        os.makedirs(out_dir, exist_ok=True)
+        out_path = os.path.join(out_dir, "traffic_data_out.jsonl")
+        with open(out_path, "a", encoding="utf-8") as fh:
+            for _ in range(num_records):
+                record = simulate_traffic_record()
+                fh.write(json.dumps(record) + "\n")
+                print(f"Wrote record (fallback): {record}")
 
 if __name__ == "__main__":
-    # Default execution (local)
-    generate_traffic_data(output_path="data/raw/traffic_data.csv")
+    produce_traffic_data()

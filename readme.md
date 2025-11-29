@@ -35,25 +35,25 @@ Streaming Analytics – Real-time alerts for overspeeding, congestion, and accid
 Dashboard & Reporting – Visualize metrics and summarize findings.
 
 🛠️ Tech Stack
-Layer	Tools & Technologies
-Data Simulation	Python (random, faker)
-Database	SQLite (local), Azure SQL Database
-Batch Processing	Pandas, SQL queries
-Streaming	Azure Stream Analytics / Apache Kafka
-Storage	SQL Database, Azure Data Lake
-Visualization	Power BI / Streamlit / Grafana
-Big Data (Optional)	Spark, Hadoop
-Orchestration (Optional)	Airflow
+Layer Tools & Technologies
+Data Simulation Python (random, faker)
+Database SQLite (local), Azure SQL Database
+Batch Processing Pandas, SQL queries
+Streaming Azure Stream Analytics / Apache Kafka
+Storage SQL Database, Azure Data Lake
+Visualization Power BI / Streamlit / Grafana
+Big Data (Optional) Spark, Hadoop
+Orchestration (Optional) Airflow
 📂 Project Structure
 📦 smart-traffic-analytics
- ┣ 📜 README.md
- ┣ 📜 traffic_simulator.py      # Data generator → Database ingestion
- ┣ 📜 traffic.db                # SQLite database (raw traffic data)
- ┣ 📜 traffic_etl.py            # Batch ETL pipeline
- ┣ 📜 processed_traffic.db      # Processed table (after ETL)
- ┣ 📜 streaming_pipeline/       # Real-time processing setup
- ┣ 📜 dashboard/                # Dashboard code (Power BI / Streamlit)
- ┣ 📜 report/                   # Final PDF Report
+┣ 📜 README.md
+┣ 📜 traffic_simulator.py # Data generator → Database ingestion
+┣ 📜 traffic.db # SQLite database (raw traffic data)
+┣ 📜 traffic_etl.py # Batch ETL pipeline
+┣ 📜 processed_traffic.db # Processed table (after ETL)
+┣ 📜 streaming_pipeline/ # Real-time processing setup
+┣ 📜 dashboard/ # Dashboard code (Power BI / Streamlit)
+┣ 📜 report/ # Final PDF Report
 
 🚀 Milestones
 Milestone 1: Data Simulation (Database-First)
@@ -66,8 +66,8 @@ vehicle_id, speed, location, timestamp.
 
 Sample Record:
 
-V605 | 133 | Downtown    | 2025-09-03 06:12:38
-V744 | 56  | Highway A1  | 2025-09-03 06:12:43
+V605 | 133 | Downtown | 2025-09-03 06:12:38
+V744 | 56 | Highway A1 | 2025-09-03 06:12:43
 
 Milestone 2: Batch ETL Pipeline
 
@@ -118,29 +118,29 @@ Key insights.
 Performance results.
 
 📊 System Architecture
-       ┌─────────────┐
-       │ Data Source │  (Python IoT Generator → Database)
-       └──────┬──────┘
-              │
-              ▼
-     ┌───────────────┐
-     │   Batch ETL   │ (Pandas + SQL)
-     └───────────────┘
-              │
-              ▼
-     ┌───────────────┐
-     │ Processed DB  │ (SQLite → Azure SQL / Data Lake)
-     └───────────────┘
-              │
-              ▼
-     ┌───────────────┐
-     │  Streaming    │ (Kafka / Azure Stream Analytics)
-     └───────────────┘
-              │
-              ▼
-     ┌───────────────┐
-     │  Dashboard    │ (Power BI / Streamlit)
-     └───────────────┘
+┌─────────────┐
+│ Data Source │ (Python IoT Generator → Database)
+└──────┬──────┘
+│
+▼
+┌───────────────┐
+│ Batch ETL │ (Pandas + SQL)
+└───────────────┘
+│
+▼
+┌───────────────┐
+│ Processed DB │ (SQLite → Azure SQL / Data Lake)
+└───────────────┘
+│
+▼
+┌───────────────┐
+│ Streaming │ (Kafka / Azure Stream Analytics)
+└───────────────┘
+│
+▼
+┌───────────────┐
+│ Dashboard │ (Power BI / Streamlit)
+└───────────────┘
 
 📸 Screenshots (to add later)
 
@@ -171,13 +171,13 @@ Key insights.
 System performance.
 
 👥 Team Roles
-Role	Member Responsibility
-Data Simulation Lead	Python generator → Database ingestion
-Batch ETL Engineer	Build ETL logic with Pandas + SQL
-Streaming Engineer	Kafka / Azure Stream Analytics
-Cloud Architect	Azure SQL, Event Hub, Data Lake setup
-Dashboard Developer	Power BI / Streamlit dashboards
-Project Manager	Integration + final report
+Role Member Responsibility
+Data Simulation Lead Python generator → Database ingestion
+Batch ETL Engineer Build ETL logic with Pandas + SQL
+Streaming Engineer Kafka / Azure Stream Analytics
+Cloud Architect Azure SQL, Event Hub, Data Lake setup
+Dashboard Developer Power BI / Streamlit dashboards
+Project Manager Integration + final report
 🌟 Key Learnings
 
 IoT data ingestion directly into databases.
@@ -193,3 +193,45 @@ Deploying pipelines to cloud platforms.
 📜 License
 
 This project is for educational purposes as part of a Data Engineering course.
+
+## Local Kafka + Hive (developer setup)
+
+If you want to run the pipeline against a local Kafka broker and a HiveServer2 instance (recommended for end-to-end testing), follow these steps.
+
+1. Start Kafka (local broker)
+
+- A ready-to-run Docker Compose for Kafka (Zookeeper + Kafka) is included: `docker-compose.kafka.yml`.
+- Start it from the project root:
+
+```powershell
+docker compose -f docker-compose.kafka.yml up -d
+```
+
+- Kafka broker will be reachable at `localhost:9092`.
+
+2. Start HiveServer2 (options)
+
+- Hive is heavier to run locally. For development you have two practical options: - Use an existing Hive cluster (set `HIVE_HOST`/`HIVE_PORT` in the scripts to point to it). - Run a Hive dev stack in Docker. There are community-maintained Docker Compose projects that spin up Hadoop + Hive + HiveServer2 + metastore (MySQL/Postgres). A reliable example is the `bde2020` Hive images; see: https://github.com/big-data-europe/docker-hive
+
+If you want, I can add an opinionated `docker-compose.hive.yml` (Hadoop + MySQL metastore + HiveServer2) to this repo — it will be heavier but will let you run HiveServer2 locally.
+
+3. Install Python dependencies
+
+```powershell
+python -m pip install --upgrade pip
+python -m pip install -r requirements.txt
+```
+
+4. Run the ETL and viewer (strict mode — Kafka + Hive required by default)
+
+```powershell
+# Run ETL (requires Kafka + Hive unless you pass --allow-fallback)
+python .\src\etl\traffic_etl.py
+
+# Inspect processed table using the Hive viewer
+python .\src\analytics\view_data.py processed_traffic 10
+```
+
+If you prefer fallbacks (JSONL/SQLite) temporarily while bringing up Hive, add `--allow-fallback` to the commands.
+
+If you'd like, I can add a full `docker-compose.hive.yml` and test the end-to-end run locally — say "Yes, add Hive compose" and I'll scaffold it next.
