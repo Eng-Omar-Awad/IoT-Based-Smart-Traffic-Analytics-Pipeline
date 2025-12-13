@@ -231,7 +231,3 @@ python .\src\etl\traffic_etl.py
 # Inspect processed table using the Hive viewer
 python .\src\analytics\view_data.py processed_traffic 10
 ```
-
-If you prefer fallbacks (JSONL/SQLite) temporarily while bringing up Hive, add `--allow-fallback` to the commands.
-
-If you'd like, I can add a full `docker-compose.hive.yml` and test the end-to-end run locally — say "Yes, add Hive compose" and I'll scaffold it next.
